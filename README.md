@@ -1,10 +1,10 @@
 # Aplikace na výběr seznamu četby k maturitě
 
-Obsahuje seznam četby pro [G+SOŠ Rokycany](https://gasos-ro.cz/)
+Obsahuje seznam četby pro [G+SOŠ Rokycany](https://gasos.cz/)
 
 Exportuje seznam četby do formátu PDF
 
-Dostupné zde: [https://cetba.gasos-ro.cz/](https://cetba.gasos-ro.cz/)
+Dostupné zde: [https://cetba.gasos.cz/](https://cetba.gasos.cz/) nebo [https://cetba4ib.gasos.cz/](https://cetba4ib.gasos.cz/)
 
 
 ## Konfigurace
