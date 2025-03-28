@@ -1,10 +1,8 @@
 import React from "react";
-import QRCode from "qrcode";
 
-import { Font, Document, Page, Text, View, Image } from '@react-pdf/renderer';
+import { Font, Document, Page, Text, View } from '@react-pdf/renderer';
 
 import { BookItem } from '../database/databaseStructure';
-import { generateShareUrl } from "../hook/useShare";
 
 Font.register({
     family: "Arial", fonts: [
@@ -21,50 +19,69 @@ Font.registerHyphenationCallback(word => (
 export default function SeznamCetby(props: {
     personName: string,
     personClass: string,
-    yearOfExam: string,
+    count: string,
     dateOfIssue: string | null,
     pronouncement: boolean,
     books: BookItem[]
 }) {
 
+    let countInt = NaN;
+
+    try {
+        countInt = parseInt(props.count);
+    } catch { }
+    
+    if ( isNaN(countInt) )
+        countInt = 0;
+
+
+
     const sorted = React.useMemo(() => {
 
-        const authors = {} as Record<number,number>;
-
-        props.books.forEach(book => {
-            book.authors.forEach(author => {
-                if (!authors[author.id] || authors[author.id] > book.published)
-                    authors[author.id] = book.published;
-            })
-        })
-
         const sorted = props.books.sort((a,b) => 
-            Math.min(...a.authors.map(ax => authors[ax.id]), a.published) -  Math.min(...b.authors.map(bx => authors[bx.id]), b.published) ||
-            (a.authors[0]?.short ?? "").localeCompare(b.authors[0]?.short ?? "", "cs") ||
-            (a.published) - (b.published)
+            (a.authors[0]?.short ?? "").localeCompare(b.authors[0]?.short ?? "") ||
+            a.name.localeCompare(b.name)
         )
 
         return sorted;
     }, [ props.books ]);
 
-    const qrCodePromise = React.useCallback(() => {
-        const shareUrl = generateShareUrl( props.books.map(book => book.id) ) + "&tab=overview&suppress_share";
 
-        return new Promise<string>((resolve, reject) => {
-            QRCode.toDataURL(shareUrl, {
-                errorCorrectionLevel: "H",
-                margin: 0,
-                type: "image/png"
-            }, (error, url) => {
-                if (error) reject(error)
-                else resolve(url)
-            });
-        })
-    }, [ props.books ])
+    let items = [];
+    for (let i = 0; i < Math.max(countInt, sorted.length); i++) {
+        
+        if (i < sorted.length) {
+            let index = i;
+            let book = sorted[i];
+
+            items[i] = (
+                <>
+                    <Row
+                        first={<Text>{`${index + 1}.`}</Text>}
+                        second={<Text>{book.categories[0].short.toUpperCase()}</Text>}
+                        flex={<Text>{book.name.split(/,\s*/).reverse().join(" ")}{book.authors.length > 0 && (" (" + book.authors.map(author => author.short).join(", ") + ")")}</Text>}
+                    />
+                    <Separator orientation="vertical"/>
+                </>
+            );
+        } else {
+            items[i] = (
+                <>
+                    <Row
+                        first={<Text>{`${i + 1}.`}</Text>}
+                        second={<Text>{" "}</Text>}
+                        flex={<Text>{" "}</Text>}
+                    />
+                    <Separator orientation="vertical"/>
+                </>
+            );
+        }
+    }
+
 
     return (
         <Document
-            title={`Seznam četby - ${props.personName}`}
+            title={`${props.personClass} - ${props.personName}`}
         >
             <Page size="A4" style={{
                 fontFamily: "Arial",
@@ -79,158 +96,30 @@ export default function SeznamCetby(props: {
                     fontWeight: "bold",
                 }}>
                     <Text style={{
-                        fontSize: 16,
+                        fontSize: 18,
                     }}>
-                        {"Gymnázium a SOŠ Rokycany"}
+                        {`${props.personName}`}
                     </Text>
-                    <Padder padding={5} />
+                    <Padder padding={10} />
                     <Text style={{
-                        fontSize: 12,
+                        fontSize: 14,
                     }}>
-                        {`Seznam literárních děl k ústní části maturitní zkoušky\nz českého jazyka a literatury`}
+                        {`${props.personClass.toUpperCase()}`}
                     </Text>
                 </View>
-                <Padder padding={16} />
-                <View style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    textAlign: "left",
-                }}>
-                    <View style={{
-                        flex: 2,
-                    }}>
-                        <Text style={{ fontSize: 10, fontWeight: "normal", }}>{"Jméno studenta"}</Text>
-                        <Padder padding={3} />
-                        <Text style={{ fontSize: 16, fontWeight: "bold", paddingRight: 10 }}>{props.personName}</Text>
-                    </View>
-                    <View style={{
-                        flex: 1,
-                    }}>
-                        <Text style={{ fontSize: 10, fontWeight: "normal", }}>{"Třída"}</Text>
-                        <Padder padding={3} />
-                        <Text style={{ fontSize: 16, fontWeight: "bold", paddingRight: 10 }}>{props.personClass}</Text>
-                    </View>
-                    <View style={{
-                        flex: 1,
-                    }}>
-                        <Text style={{ fontSize: 10, fontWeight: "normal", }}>{"Rok maturity"}</Text>
-                        <Padder padding={3} />
-                        <Text style={{ fontSize: 16, fontWeight: "bold", paddingRight: 10 }}>{props.yearOfExam}</Text>
-                    </View>
-                </View>
-                <Padder padding={16} />
+                <Padder padding={15} />
                 <View style={{
                     flex: 1,
-                    fontSize: 10
+                    fontSize: 12
                 }}>
                     <Separator orientation="vertical"/>
                     <Row
-                        first={<Text style={{ fontWeight: "bold" }}>{"Pořadové číslo"}</Text>}
-                        second={<Text style={{ fontWeight: "bold" }}>{"Číslo ve školním seznamu"}</Text>}
-                        flex={<Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>{"Autor, název díla"}</Text>}
+                        first={<Text style={{ fontSize: 14, fontWeight: "bold" }}>{"Pořadí"}</Text>}
+                        second={<Text style={{ fontSize: 14, fontWeight: "bold" }}>{"Věk"}</Text>}
+                        flex={<Text style={{ fontSize: 14, fontWeight: "bold" }}>{"Účastník"}</Text>}
                     />
                     <Separator orientation="vertical"/>
-                    { sorted.map((book, index) => (
-                            <>
-                                <Row
-                                    first={<Text>{`${index + 1}.`}</Text>}
-                                    second={<Text>{`${book.id}.`}</Text>}
-                                    flex={<Text>{book.authors.length > 0 && (book.authors.map(author => author.short).join(", ") + ": ")}{book.name}</Text>}
-                                />
-                                <Separator orientation="vertical"/>
-                            </>
-                        ))
-                    }
-                </View>
-                <Padder padding={16} />
-                <View break={false} style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "flex-end",
-                    fontSize: 12,
-                }}>
-                    <View style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center"
-                    }}>
-                        {props.dateOfIssue && (<Text>{props.dateOfIssue}</Text>)}
-                        <Text style={{ marginTop: -5, letterSpacing: 1,  }}>{"...................................."}</Text>
-                        <Text style={{ fontSize: 10, }}>{"Datum"}</Text>
-                    </View>
-                    <View style={{ flexGrow: 1, }}/>
-                    <View style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center"
-                    }}>
-                        <Text style={{ marginTop: -5, letterSpacing: 1, }}>{"...................................."}</Text>
-                        <Text style={{ fontSize: 10, }}>{"Podpis"}</Text>
-                    </View>
-                </View>
-            </Page>
-            <Page style={{
-                fontFamily: "Arial",
-                lineHeight: "1.2",
-                padding: "2.5cm",
-                display: "flex",
-                flexDirection: "column",
-            }}>
-                { props.pronouncement && (<>
-                    <View style={{
-                        fontSize: 12,
-                    }}>
-                        <Text>{"Čestně prohlašuji,"}</Text>
-                        <Padder padding={5}/>
-                        <Text>{"že výběr titulů odpovídá kritériím stanoveným předmětovou komisí ČJL."}</Text>
-                    </View>
-                    <Padder padding={30} />
-                    <View break={false} style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "flex-end",
-                        fontSize: 12,
-                    }}>
-                        <View style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center"
-                        }}>
-                            {props.dateOfIssue && (<Text>{props.dateOfIssue}</Text>)}
-                            <Text style={{ marginTop: -5, letterSpacing: 1,  }}>{"...................................."}</Text>
-                            <Text style={{ fontSize: 10, }}>{"Datum"}</Text>
-                        </View>
-                        <View style={{ flexGrow: 1, }}/>
-                        <View style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center"
-                        }}>
-                            <Text style={{ marginTop: -5, letterSpacing: 1,  }}>{"...................................."}</Text>
-                            <Text style={{ fontSize: 10, }}>{"Podpis"}</Text>
-                        </View>
-                    </View>
-                </>)}
-                <View style={{ flexGrow: 1, }}/>
-                <View style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                }}>
-                    <Text style={{
-                        marginBottom: 1,
-                        color: "#dddddd",
-                        fontSize: 8
-
-                    }}>
-                        {"App by Broňa Růžička"}
-                    </Text>
-                    <Image
-                        style={{
-                            maxHeight: "4cm"
-                        }}
-                        src={qrCodePromise}
-                    />
+                    { items }
                 </View>
             </Page>
         </Document>
@@ -267,7 +156,8 @@ const Row = (props: {
             </View>
             <Separator/>
             <View style={{
-                padding: 5,
+                padding: 7,
+                paddingLeft: 7,
                 textAlign: "left",
                 flex: 1
             }}>

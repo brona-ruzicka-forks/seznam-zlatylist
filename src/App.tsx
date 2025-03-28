@@ -35,8 +35,8 @@ export default function App() {
                                         {[
                                             { tag: "overview", label: "Přehled", component: (<OverviewFragment/>) },
                                             { tag: "search", label: "Vyhledat", component: (<SearchFragment/>) },
-                                            { tag: "books", label: "Díla", component: (<BooksFragment/>)},
-                                            { tag: "authors", label: "Autoři", component: (<AuthorsFragment/>)},
+                                            { tag: "books", label: "Účastníci", component: (<BooksFragment/>)},
+                                            { tag: "authors", label: "Týmy", component: (<AuthorsFragment/>)},
                                             { tag: "categories", label: "Kategorie", component: (<CategoriesFragment/>)},
                                         ]}
                                     </Layout>

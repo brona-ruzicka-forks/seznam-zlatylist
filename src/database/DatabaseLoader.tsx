@@ -74,7 +74,6 @@ export default function DatabaseLoader(props: {
                 short: author.short ?? author.name,
                 name: author.name,
                 aliases: author.aliases ?? [],
-                born: author.born,
 
                 books: [],
                 categories: [],
@@ -83,8 +82,6 @@ export default function DatabaseLoader(props: {
                 id: category.id,
                 short: category.short ?? category.name,
                 name: category.name,
-                kind: category.kind as any,
-                limit: category.limit,
 
                 books: [],
                 authors: [],
@@ -95,7 +92,6 @@ export default function DatabaseLoader(props: {
                     id: book.id,
                     name: book.name,
                     note: book.note,
-                    published: book.published,
                     
                     authors: book.authors?.map(id => authors[id]) ?? [],
                     categories: book.categories?.map(id => categories[id]) ?? [],
@@ -124,7 +120,6 @@ export default function DatabaseLoader(props: {
                 books: books,
                 authors: authors,
                 categories: categories,
-                extra: data.extra
             });
 
             return;

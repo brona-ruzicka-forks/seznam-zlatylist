@@ -93,7 +93,6 @@ export default function HighLayout(props: {
                         <Stack spacing={2} sx={{ height: "100%" }}>
                             <Card sx={{ width: "100%", minHeight: (theme) => theme.spacing(20), flex: 1 }}>
                                 <CardClickOverlay
-                                    visible={!collapsed}
                                     onClickCapture={() => setCollapsed(true)}
                                 >
                                     <SwipeableTabs
@@ -106,12 +105,9 @@ export default function HighLayout(props: {
                             </Card>
                             <Card sx={{ width: "100%" }}>
                                 <CardClickOverlay
-                                    visible={collapsed}
                                     onClickCapture={() => setCollapsed(false)}
                                 >
-                                    <AutoCollapseController collapsed={collapsed}>
-                                        {overview?.component}
-                                    </AutoCollapseController>
+                                    {overview?.component}
                                 </CardClickOverlay>
                             </Card>
                         </Stack>

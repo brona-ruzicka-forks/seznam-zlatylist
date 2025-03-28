@@ -41,7 +41,7 @@ export default function CategoriesFragment() {
                                 <ListItemText primary={category.name}/>
                             </ListItemButton>
                             <ListItemSecondaryAction  sx={{ pointerEvents: "none" }}>
-                                <ListItemText secondary={`${count} / ${category.limit.min}`}/>
+                                <ListItemText secondary={`${count}`}/>
                             </ListItemSecondaryAction>
                         </ListItem>
                     )

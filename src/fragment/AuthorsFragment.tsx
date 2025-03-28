@@ -27,7 +27,7 @@ export default function AuthorsFragment() {
     const authors = Object.entries(counts.authors)
         .filter(([_, count]) => count > 0)
         .map(([id, count]) => [ database.authors[id as any], count ] as const)
-        .sort(([a, _], [b, __]) => a.short.localeCompare(b.short, "cs"));
+        .sort(([a, _], [b, __]) => a.short.localeCompare(b.short));
 
     return (
         <>
@@ -40,12 +40,12 @@ export default function AuthorsFragment() {
                                 sx={{padding: 0}}
                             >
                                 <ListItemButton
-                                    onClick={() => search(`autor:"${author.name}"`)}
+                                    onClick={() => search(`tým:"${author.name}"`)}
                                 >
                                     <ListItemText primary={`${author.name}`}/>
                                 </ListItemButton>
                                 <ListItemSecondaryAction sx={{ pointerEvents: "none" }}>
-                                    <ListItemText secondary={`${count} / ${database.extra.authorLimit.max}`}/>
+                                    <ListItemText secondary={`${count}`}/>
                                 </ListItemSecondaryAction>
                             </ListItem>
                         )

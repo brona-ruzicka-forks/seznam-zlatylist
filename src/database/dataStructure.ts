@@ -7,7 +7,6 @@ type BookData = Readonly<{
     id: number,
     name: string,
     note: Nullable<string>,
-    published: number,
 
     authors: Nullable<ReadonlyArray<Reference<AuthorData>>>,
     categories: Nullable<ReadonlyArray<Reference<CategoryData>>>,
@@ -18,35 +17,19 @@ type AuthorData = Readonly<{
     short: Nullable<string>,
     name: string,
     aliases: Nullable<string[]>
-    born: number,
 }>;
 
-type CategoryKind = "form" | "era"
 type CategoryData = Readonly<{
     id: number,
     short: Nullable<string>,
     name: string,
-    kind: CategoryKind,
-    limit: LimitData
 }>;
 
-type LimitData = Readonly<{
-    max?: number,
-    min?: number,
-}>;
-
-type Extra = Readonly<{
-    authorLimit: LimitData
-    bookLimit: LimitData
-    classNames: ReadonlyArray<string> | undefined | null
-    listName: string | undefined | null
-}>
 
 type Data = Readonly<{
     books: ReadonlyArray<BookData>,
     authors: ReadonlyArray<AuthorData>,
     categories: ReadonlyArray<CategoryData>,
-    extra: Extra
 }>;
 
 
@@ -55,9 +38,6 @@ export type {
     Reference,
     BookData,
     AuthorData,
-    CategoryKind,
     CategoryData,
-    LimitData,
-    Extra,
     Data,
 };

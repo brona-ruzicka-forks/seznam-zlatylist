@@ -30,13 +30,12 @@ import useSelection from "../selection/useSelection";
 import useAutohideQueryParam from "../queryparams/useAutohideQueryParam";
 import useSearch from "../hook/useSearch";
 import useCookie from "../cookie/useCookie";
+import { Group } from "@mui/icons-material";
 
 
 const sorts = [
     "book_asc",
     "book_desc",
-    "year_asc",
-    "year_desc",
     "author_asc",
     "author_desc",
 ] as const;
@@ -92,14 +91,12 @@ export default function SearchFragment() {
 
     const searchIndex = React.useMemo<Readonly<{
         books: (readonly [ string, BookItem ])[],
-        published: (readonly [ string, BookItem ])[],
         authors: (readonly [ string, AuthorItem ])[],
         categories: (readonly [ string, CategoryItem ])[],
     }>>(() => {
         if (!database.loaded)
             return {
                 books: [],
-                published: [],
                 authors: [],
                 categories: [],
             };
@@ -107,10 +104,6 @@ export default function SearchFragment() {
         const books = Object.values(database.books).flatMap(book => [
             [normalize(book.name), book] as const,
             ...( book.note ? [ [ normalize(book.note), book] as const ] : [] )
-        ]);
-
-        const published = Object.values(database.books).flatMap(book => [
-            [`${book.published}`, book] as const
         ]);
 
         const authors = Object.values(database.authors).flatMap(author => [
@@ -127,7 +120,6 @@ export default function SearchFragment() {
 
         return {
             books,
-            published,
             authors,
             categories,
         };
@@ -161,29 +153,17 @@ export default function SearchFragment() {
 
             const matches = words.map(word => {
                 switch (category) {
-                    case "kniha":
-                    case "nazev":
-                    case "book":
-                    case "tit":
+                    case "ucastnik":
+                    case "jmeno":
                         return searchIndex.books.filter(([query, _]) => query.includes(word)).map(([_, book]) => book);
-                    case "vydano":
-                    case "vyd":
-                    case "published":
-                    case "bub":
-                        return searchIndex.published.filter(([query, _]) => query.startsWith(word)).map(([_, book]) => book);
-                    case "autor":
-                    case "aut":
-                    case "author":
+                    case "tym":
                         return searchIndex.authors.filter(([query, _]) => query.includes(word)).flatMap(([_, author]) => author.books)
                     case "kategorie":
                     case "kat":
-                    case "category":
                     case "cat":
                         return searchIndex.categories.filter(([query, _]) => query.includes(word)).flatMap(([_, category]) => category.books);
                     case "vybrano":
                     case "vyb":
-                    case "selected":
-                    case "sel":
                         if (!database.loaded) break;
                         if (word.trim() === "ne" || word.trim() === "no")
                             return Object.values(database.books).filter(book => !selection.includes(book.id));
@@ -191,7 +171,6 @@ export default function SearchFragment() {
                     default:
                         return [
                             ...searchIndex.books.filter(([query, _]) => query.includes(word)).map(([_, book]) => book),
-                            ...searchIndex.published.filter(([query, _]) => query.includes(word)).map(([_, book]) => book),
                             ...searchIndex.authors.filter(([query, _]) => query.includes(word)).flatMap(([_, author]) => author.books),
                             ...searchIndex.categories.filter(([query, _]) => query.includes(word)).flatMap(([_, category]) => category.books)
                         ]    
@@ -226,26 +205,12 @@ export default function SearchFragment() {
         switch (sort) {
             case "book_asc":
                 sortingFun = (a,b) =>
-                    a.name.localeCompare(b.name, "cs") ||
-                    a.published - b.published;
+                    a.name.localeCompare(b.name, "cs");
                 break;
 
             case "book_desc":
                 sortingFun = (a,b) =>
-                    b.name.localeCompare(a.name, "cs") || 
-                    a.published - b.published;
-                break;
-
-            case "year_asc":
-                sortingFun = (a,b)=> 
-                    (a.published - b.published) ||
-                    a.name.localeCompare(b.name, "cs");
-                break;
-
-            case "year_desc":
-                sortingFun = (a,b) => 
-                    (b.published - a.published) ||
-                    a.name.localeCompare(b.name, "cs");
+                    b.name.localeCompare(a.name, "cs");
                 break;
 
             case "author_asc":
@@ -271,7 +236,7 @@ export default function SearchFragment() {
             <Box sx={{ position: "relative" }}>
                 <StyledTextField
                     variant="standard"
-                    placeholder="Prohledat díla…"
+                    placeholder="Prohledat účastníky…"
                     autoFocus={autoFocus}
                     fullWidth
                     value={search}
@@ -281,10 +246,13 @@ export default function SearchFragment() {
                             e.preventDefault();
 
                             const values = Object.values(matched);
-                            if (values.length !== 1) return;
-
-                            selection.toggle(values[0].id);
-                            setSearch("");
+                            if (values.length === 1) {
+                                selection.toggle(values[0].id);
+                                setSearch("");
+                            } else if (e.ctrlKey) {
+                                values.forEach(value => selection.toggle(value.id));
+                                setSearch("");
+                            }
                         }
                     }}
                 />
@@ -304,12 +272,10 @@ export default function SearchFragment() {
                     </IconButton>
                     <Tooltip
                         title={{
-                            book_asc: "Řazení: Název díla, Vzestupně",
-                            book_desc: "Řazení: Název díla, Sestupně",
-                            year_asc: "Řazení: Rok vydání, Vzestupně",
-                            year_desc: "Řazení: Rok vydání, Sestupně",
-                            author_asc: "Řazení: Autor, Vzestupně",
-                            author_desc: "Řazení: Autor, Sestupně",
+                            book_asc: "Řazení: Účastník, Vzestupně",
+                            book_desc: "Řazení: Účastník, Sestupně",
+                            author_asc: "Řazení: Tým, Vzestupně",
+                            author_desc: "Řazení: Tým, Sestupně",
                         }[sort]}
                     
                     >
@@ -327,9 +293,8 @@ export default function SearchFragment() {
                                 }}
                                 color={sort.endsWith("asc") ? "action" : "disabled"}
                             />
-                            { sort.startsWith("book")   && <Abc/>        } 
-                            { sort.startsWith("year")   && <AccessTime/> } 
-                            { sort.startsWith("author") && <Person/>     }
+                            { sort.startsWith("book")   && <Person/>        } 
+                            { sort.startsWith("author") && <Group/>         }
                             <ArrowDropDown
                                 fontSize="small"
                                 sx={{
@@ -410,33 +375,16 @@ const CustomListItemContent = (props: {
         <ListItemText id={`${props.book.id}`}
             primary={
                 (<>
-                    {
-                        isSmallScreen && (
-                            (author) => author && author + ": "
-                        )(
-                            props.book.authors?.map(author => author.short).join(", ") || undefined
-                        )
-                    }
                     {props.book.name}
                 </>)
             }
             secondary={
                 (<>
                     {
-                        !isSmallScreen && (
+                        isSmallScreen ? (
+                            props.book.authors?.map(author => author.short).join(" • ") + " • " + props.book.categories?.map(category => category.name).join(" • ")
+                        ) : (
                             props.book.authors?.map(author => author.name).join(", ") || undefined
-                        )
-                    }
-                    { !isSmallScreen && props.book.note && !!props.book.authors.length && (<br/>) }
-                    {
-                        props.book.note && (
-                            <i>{ props.book.note }</i>
-                        )
-                    }
-                    { isSmallScreen && props.book.note && !!props.book.categories.length && (<br/>) }
-                    {
-                        isSmallScreen && (
-                            props.book.categories?.map(category => category.short).join(" • ") || undefined
                         )
                     }
                 </>)
@@ -449,7 +397,7 @@ const CustomListItemContent = (props: {
                     key={category.id}
                     size="small"
                     variant="outlined"
-                    label={category.short}
+                    label={category.name}
                     onClick={() => search(`kategorie:"${category.name}"`)}
                 />
             ))}
