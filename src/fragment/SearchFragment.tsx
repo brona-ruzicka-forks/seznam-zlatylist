@@ -127,9 +127,29 @@ export default function SearchFragment() {
 
     const matched = React.useMemo(() => {
 
-        if (search.match(/\d{3}/)) {
+        if (!database.loaded)
+            return {};
+
+        if (search.match(/^\d{2}$/g)) {
+            let id = parseInt(search);
+            let otherId = id < 50 ? id + 50 : id - 50;
+
+            let authors = [];
+            if (id in database.authors)
+                authors.push(database.authors[id]);
+            if (otherId in database.authors)
+                authors.push(database.authors[otherId]);
+
+            return authors.flatMap(author => author.books)
+                .reduce((red, val) => {
+                    red[val.id] = val;
+                    return red;
+                }, {} as Record<number, BookItem>);
+        }
+
+        if (search.match(/^\d{3}$/g)) {
             let number = parseInt(search);
-            if (database.loaded && number in database.books)
+            if (number in database.books)
                 return { [number]: database.books[number] } as Record<number, BookItem>;
             else
                 return { } as Record<number, BookItem>;
