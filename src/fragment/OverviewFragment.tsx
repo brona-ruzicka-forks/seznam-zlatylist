@@ -22,15 +22,21 @@ import useShare from "../hook/useShare";
 import useSelection from "../selection/useSelection";
 import useGlobalStateModifier from "../globalstate/useGlobalStateModifier";
 import useQueryParam from "../queryparams/useQueryParam";
+import useAutohideQueryParam from "../queryparams/useAutohideQueryParam";
 
 
 export default function OverviewFragment() {
 
     const modify = useGlobalStateModifier();
 
-    const selection = useSelection();
-    // const [ sParam, ] = useQueryParam("s");
-    // const isShared = sParam !== null;
+    const [_u, setUcastnici ] = useAutohideQueryParam("ucastnici");
+    const [_e, setExkurze ] = useAutohideQueryParam("exkurze");
+    const [_c, setCas ] = useAutohideQueryParam("cas");
+    const [_p, setPocet ] = useAutohideQueryParam("pocet");
+    //
+    // const selection = useSelection();
+    // // const [ sParam, ] = useQueryParam("s");
+    // // const isShared = sParam !== null;
 
     return (
         <Stack sx={{ height: "100%" }}>
@@ -73,7 +79,7 @@ export default function OverviewFragment() {
             >
                 {/*<Button variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => modify({ share: "open" })}>Sdílet</Button>*/}
                 <Button color="success" variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => modify({ export: "open" })}>Pokračovat</Button>
-                <Button color="error" variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => selection.clear()}>Vymazat</Button>
+                <Button color="error" variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => {setUcastnici(""); setExkurze(""); setCas(""); setPocet("")}}>Vymazat</Button>
             </Stack>
         </Stack>
     )
