@@ -33,6 +33,9 @@ import SeznamCetby from "../pdf/SeznamCetby";
 import useSelection from "../selection/useSelection";
 import useDatabase from "../database/useDatabase";
 import ReactPDF, { pdf } from "@react-pdf/renderer";
+import useAutohideQueryParam from "../queryparams/useAutohideQueryParam";
+import useGlobalStateModifier from "../globalstate/useGlobalStateModifier";
+import {useShareUrl} from "../hook/useShare";
 
 
 const CLASSES = [
@@ -48,16 +51,16 @@ for (let i = 0; i < 50; i++) { COUNTS[i] = `${i+1}`; }
 export default function ExportDialog() {
 
     const [ print, setPrint ] = useGlobalStateValue("export");
-    
+
     const isOpen = !!print;
     const close = () => setPrint(null);
 
     const theme = useTheme();
     const small = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const [ personName, setPersonName ] = useGlobalStateValue("person_name");
-    const [ personClass, setPersonClass ] = useCookie("person_class");
-    const [ count, setCount ] = useGlobalStateValue("count");
+    const [ personName, setPersonName ] = useAutohideQueryParam("exkurze");
+    const [ personClass, setPersonClass ] = useAutohideQueryParam("cas");
+    const [ count, setCount ] = useAutohideQueryParam("pocet");
 
     const [ showDate, setShowDate ] = useCookie("show_date");
     const [ dateOfIssue, setDateOfIssue ] = useCookie("date_of_issue");
@@ -69,7 +72,14 @@ export default function ExportDialog() {
     const database = useDatabase();
     const books = React.useMemo(() => database.loaded ? selection.map(id => database.books[id]) : [], [ selection, database]);
 
-    
+
+    const shareUrl = useShareUrl();
+    const canCopy = !!(navigator.clipboard && navigator.clipboard.writeText);
+    const copy = React.useCallback(() => {
+        navigator.clipboard.writeText(shareUrl);
+    }, [ shareUrl ]);
+
+
     return (
         <Dialog open={isOpen} onClose={close} fullScreen={small}>
             <DialogTitle sx={{
@@ -77,7 +87,7 @@ export default function ExportDialog() {
                 justifyContent: "space-between",
                 alignItems: "center"
             }}>
-                <span>Exportovat seznam do PDF</span>
+                <span>Údaje o exkurzi</span>
                 <IconButton
                     sx={{ marginRight: -1 }}
                     disableTouchRipple
@@ -143,12 +153,12 @@ export default function ExportDialog() {
                         //                 sx={{marginTop: "0 !important"}}
                         //             />
                         //         </Stack>
-                        //         <Stack> 
+                        //         <Stack>
                         //             <Typography variant="body2" color={pronouncement === "false" ? "GrayText" : undefined}>
                         //                 {"K\u00A0seznamu četby je třeba přiložit prohlášení o\u00A0splnění požadavků."}
                         //             </Typography>
                         //             <FormControlLabel
-                        //                 control={<Checkbox 
+                        //                 control={<Checkbox
                         //                     checked={pronouncement === "false"}
                         //                     onChange={event => setPronouncement(`${!event.target.checked}`, { expires: 7 })}
                         //                 />}
@@ -161,6 +171,19 @@ export default function ExportDialog() {
                     </Grid>
                 </LocalizationProvider>
             </DialogContent>
+
+            { canCopy && <DialogActions><Button
+                variant="outlined"
+                sx={small ? { flex: 1, padding: 1.5, margin: 1 } : undefined}
+                color="success"
+                onClick={() => {
+                    copy();
+                    close();
+                }}
+            >
+                Zkopírovat odkaz
+            </Button> </DialogActions>}
+
             <DialogActions>
                 <Buttons
                     small={small}
@@ -192,8 +215,22 @@ const Buttons = (props: {
     document: React.ReactElement<ReactPDF.DocumentProps>
 }) => {
 
+    const modify = useGlobalStateModifier();
+
     return (
         <>
+            <Button
+                variant="outlined"
+                sx={props.small ? { flex: 1, padding: 1.5, margin: 1 } : undefined}
+                color="primary"
+                onClick={() => {
+                    setTimeout(() => {
+                        modify({ share: "open", export: null });
+                    }, 0);
+                }}
+            >
+                Sdílet
+            </Button>
             <Button
                 variant="outlined"
                 sx={props.small ? { flex: 1, padding: 1.5, margin: 1 } : undefined}
@@ -202,7 +239,7 @@ const Buttons = (props: {
                     setTimeout(async () => {
                         const blob = await pdf(props.document).toBlob();
                         const url = URL.createObjectURL(blob);
-                        
+
                         const a = document.createElement("a");
                         a.style.display = "none";
                         a.href = url;
@@ -210,7 +247,7 @@ const Buttons = (props: {
 
                         document.body.appendChild(a);
                         a.click();
-                        
+
                         window.URL.revokeObjectURL(url);
                     }, 0);
                 }}

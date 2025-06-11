@@ -30,7 +30,7 @@ export default function SeznamCetby(props: {
     try {
         countInt = parseInt(props.count);
     } catch { }
-    
+
     if ( isNaN(countInt) )
         countInt = 0;
 
@@ -38,8 +38,9 @@ export default function SeznamCetby(props: {
 
     const sorted = React.useMemo(() => {
 
-        const sorted = props.books.sort((a,b) => 
+        const sorted = props.books.sort((a,b) =>
             (a.authors[0]?.short ?? "").localeCompare(b.authors[0]?.short ?? "") ||
+            ((a.categories[0]?.id ?? 0) - (b.categories[0]?.id ?? 0)) ||
             a.name.localeCompare(b.name)
         )
 
@@ -49,7 +50,7 @@ export default function SeznamCetby(props: {
 
     let items = [];
     for (let i = 0; i < Math.max(countInt, sorted.length); i++) {
-        
+
         if (i < sorted.length) {
             let index = i;
             let book = sorted[i];
@@ -137,7 +138,7 @@ const Row = (props: {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-        }}> 
+        }}>
             <Separator/>
             <View style={{
                 padding: 3,

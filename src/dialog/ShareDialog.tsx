@@ -16,13 +16,13 @@ import ContentCopy from "@mui/icons-material/ContentCopy";
 import useGlobalStateValue from "../globalstate/useGlobalStateValue";
 import useSelection from "../selection/useSelection";
 
-import { generateShareUrl } from "../hook/useShare";
+import { useShareUrl } from "../hook/useShare";
 import QRCode from "react-qr-code";
 
 
 
 export default function ShareDialog() {
-    
+
     const [ share, setShare ] = useGlobalStateValue("share");
 
     const isOpen = !!share;
@@ -47,8 +47,7 @@ const MyDialogContent = (props: {
 
     const theme = useTheme();
 
-    const selection = useSelection();
-    const shareUrl = generateShareUrl(selection)
+    const shareUrl = useShareUrl();
 
     const canCopy = !!(navigator.clipboard && navigator.clipboard.writeText);
     const copy = React.useCallback(() => {
@@ -74,7 +73,7 @@ const MyDialogContent = (props: {
             <DialogContent sx={{
                 width: props.fullScreen ? undefined : (theme => theme.spacing(64))
             }}
-            
+
             >
                 <Stack
                     spacing={3}
@@ -87,7 +86,7 @@ const MyDialogContent = (props: {
                 >
                     <Box
                         sx={{
-                            padding: 4,                            
+                            padding: 4,
                             boxSizing: props.fullScreen ? "border-box" : "content-box",
                             width: props.fullScreen ? "100%" : "256px",
                             aspectRatio: "1 / 1",
@@ -100,7 +99,7 @@ const MyDialogContent = (props: {
                             pointerEvents: "none"
 
                         }}
-                        
+
                     >
                         <QRCode
                             value={shareUrl}
@@ -148,7 +147,7 @@ const MyDialogContent = (props: {
                                     right: 0,
                                     transform: "translateY(-50%)"
                                 }}
-                                onClick={copy}   
+                                onClick={copy}
                             >
                                 <ContentCopy />
                             </IconButton>

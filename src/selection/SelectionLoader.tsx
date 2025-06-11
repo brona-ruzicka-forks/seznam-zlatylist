@@ -6,49 +6,51 @@ import SelectionContext from "./SelectionContext";
 import type { Item, SelectionOperators, Selection } from "./selectionStructure";
 import CookieContext from "../cookie/CookieContext";
 import QueryParamsContext from "../queryparams/QueryParamsContext";
+import useAutohideQueryParam from "../queryparams/useAutohideQueryParam";
 
 
 export default function SelectionLoader(props: {
     children: React.ReactNode
 }) {
 
-    const [ , setBlank ] = React.useState({});
+    // const [ , setBlank ] = React.useState({});
+    //
+    // const queryParamsContext = React.useContext(QueryParamsContext);
+    // const cookieContext = React.useContext(CookieContext);
+    //
+    // React.useEffect(() => {
+    //     const handle = { names: [ "s" ], notify: () => setBlank({}) };
+    //     queryParamsContext.subscribe(handle);
+    //     return () => queryParamsContext.unsubscribe(handle);
+    // }, [ queryParamsContext, setBlank ]);
+    //
+    // const isSearchEmpty = queryParamsContext.values["s"] === null;
+    // React.useEffect(() => {
+    //     if (queryParamsContext.values["s"] !== null)
+    //         return;
+    //
+    //     const handle = { names: [ "selection" ], notify: () => setBlank({}) };
+    //     cookieContext.subscribe(handle);
+    //     return () => cookieContext.unsubscribe(handle);
+    // }, [ isSearchEmpty, cookieContext, queryParamsContext, setBlank ]);
 
-    const queryParamsContext = React.useContext(QueryParamsContext);
-    const cookieContext = React.useContext(CookieContext);
-    
-    React.useEffect(() => {
-        const handle = { names: [ "s" ], notify: () => setBlank({}) };
-        queryParamsContext.subscribe(handle);
-        return () => queryParamsContext.unsubscribe(handle);
-    }, [ queryParamsContext, setBlank ]);
+    const [ selectionString, setSelectionString ] = useAutohideQueryParam("ucastnici");
 
-    const isSearchEmpty = queryParamsContext.values["s"] === null;
-    React.useEffect(() => {
-        if (queryParamsContext.values["s"] !== null)
-            return;
-
-        const handle = { names: [ "selection" ], notify: () => setBlank({}) };
-        cookieContext.subscribe(handle);
-        return () => cookieContext.unsubscribe(handle);
-    }, [ isSearchEmpty, cookieContext, queryParamsContext, setBlank ]);
-
-
-    const selectionString = queryParamsContext.values["s"] ?? cookieContext.values["selection"] ?? "";
-
-    const setSelectionString = React.useCallback((val: string | ((prev: string) => string)) => {
-        const isShared = queryParamsContext.values["s"] !== null;
-
-        if  (typeof val === "function") {
-            val = val(queryParamsContext.values["s"] ?? cookieContext.values["selection"] ?? "");
-        }
-
-        if (isShared) {
-            queryParamsContext.update({ s: val });
-        } else {
-            cookieContext.update({ selection: val })
-        }
-    }, [ queryParamsContext, cookieContext ]);
+    // const selectionString = queryParamsContext.values["s"] ?? cookieContext.values["selection"] ?? "";
+    //
+    // const setSelectionString = React.useCallback((val: string | ((prev: string) => string)) => {
+    //     const isShared = queryParamsContext.values["s"] !== null;
+    //
+    //     if  (typeof val === "function") {
+    //         val = val(queryParamsContext.values["s"] ?? cookieContext.values["selection"] ?? "");
+    //     }
+    //
+    //     if (isShared) {
+    //         queryParamsContext.update({ s: val });
+    //     } else {
+    //         cookieContext.update({ selection: val })
+    //     }
+    // }, [ queryParamsContext, cookieContext ]);
 
 
     const selectionArray = React.useMemo(() => selectionString.split(".").map((i) => parseInt(i)).filter(Number.isInteger), [ selectionString ]);
@@ -60,10 +62,10 @@ export default function SelectionLoader(props: {
         type: "clear",
     }) => setSelectionString((prev) => {
         const state = prev.split(".").map((i) => parseInt(i)).filter(Number.isInteger);
-        
+
         if (action.type === "clear")
             return "";
-        
+
         const items = action.items.map(item => typeof item === "object" ? item.id : item);
 
         switch (action.type) {
@@ -100,7 +102,7 @@ export default function SelectionLoader(props: {
 
         selection.add    = selectionOperators.add;
         selection.remove = selectionOperators.remove;
-        selection.toggle = selectionOperators.toggle;    
+        selection.toggle = selectionOperators.toggle;
         selection.set    = selectionOperators.set;
         selection.clear  = selectionOperators.clear;
 
@@ -112,7 +114,7 @@ export default function SelectionLoader(props: {
 
     }, [ selectionArray, selectionOperators ]);
 
-    
+
     return (
         <SelectionContext.Provider value={selection}>
             {props.children}

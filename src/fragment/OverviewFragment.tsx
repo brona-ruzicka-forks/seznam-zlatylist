@@ -29,8 +29,8 @@ export default function OverviewFragment() {
     const modify = useGlobalStateModifier();
 
     const selection = useSelection();
-    const [ sParam, ] = useQueryParam("s");
-    const isShared = sParam !== null;
+    // const [ sParam, ] = useQueryParam("s");
+    // const isShared = sParam !== null;
 
     return (
         <Stack sx={{ height: "100%" }}>
@@ -50,7 +50,7 @@ export default function OverviewFragment() {
             <Fade in={overflow}>
                 <Divider/>
             </Fade> */}
-            { isShared && (
+            {/* { isShared && (
                 <ButtonBase
                     sx={{
                         marginBottom: -2,
@@ -63,7 +63,7 @@ export default function OverviewFragment() {
                 >
                     <Typography variant="subtitle2" color="GrayText" lineHeight="unset">Prohlížíte si sdílený seznam</Typography>
                 </ButtonBase>
-            )}
+            )} */}
             <Stack
                 spacing={2}
                 direction="row"
@@ -71,8 +71,8 @@ export default function OverviewFragment() {
                     padding: 2,
                 }}
             >
-                <Button variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => modify({ share: "open" })}>Sdílet</Button>
-                <Button variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => modify({ export: "open" })}>Tisk</Button>
+                {/*<Button variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => modify({ share: "open" })}>Sdílet</Button>*/}
+                <Button color="success" variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => modify({ export: "open" })}>Pokračovat</Button>
                 <Button color="error" variant="outlined" size="medium" sx={{ flex: 1, padding: 1.5 }} onClick={() => selection.clear()}>Vymazat</Button>
             </Stack>
         </Stack>

@@ -24,8 +24,8 @@ export default function BooksFragment() {
         return (<></>);
 
     const books = selection
-        .map(id => database.books[id])
-        .sort((a,b) => a.name.localeCompare(b.name));
+        .map(id => database.books[id]);
+        // .sort((a,b) => a.name.localeCompare(b.name));
 
     return (
         <>
@@ -36,7 +36,7 @@ export default function BooksFragment() {
                         component: (
                             <ListItem
                             >
-                                <ListItemText primary={`${book.name}`}/>
+                                <ListItemText primary={`${book.id}: ${book.name}`}/>
                                 <ListItemSecondaryAction>
                                     <IconButton
                                         size="small"
@@ -54,7 +54,7 @@ export default function BooksFragment() {
                 <Typography
                     variant="body2"
                     align="center"
-                    sx={{ padding: 2 }} 
+                    sx={{ padding: 2 }}
                 >
                     Zatím tu nic není…
                 </Typography>

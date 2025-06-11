@@ -25,9 +25,9 @@ export default function OpeningSharedListDialog() {
     const [ suppressQuery, setSuppressQuery ] = useQueryParam("suppress_share");
 
     const [ closed, setClosed ] = useGlobalStateValue("share_alert");
-    const isOpen = selectionQuery !== null && suppressQuery == null && closed !== "closed";
+    // const isOpen = selectionQuery !== null && suppressQuery == null && closed !== "closed";
+    const isOpen = false;
 
-    
     if (suppressQuery !== null) {
         setClosed("closed", true);
         setSuppressQuery(null, true, true);

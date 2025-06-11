@@ -2,6 +2,7 @@ import React from "react";
 import useSelection from "../selection/useSelection";
 import useGlobalStateModifier from "../globalstate/useGlobalStateModifier";
 import { SelectionArray } from "../selection/selectionStructure";
+import useAutohideQueryParam from "../queryparams/useAutohideQueryParam";
 
 export default function useShare() {
 
@@ -27,10 +28,18 @@ export default function useShare() {
 
 }
 
-export const generateShareUrl = (selection: SelectionArray) => {
-    
+export const useShareUrl = () => {
+
+    const [ ucastnici ] = useAutohideQueryParam("ucastnici");
+    const [ exkurze ] = useAutohideQueryParam("exkurze");
+    const [ cas ] = useAutohideQueryParam("cas");
+    const [ pocet ] = useAutohideQueryParam("pocet");
+
     const url = new URL(window.location.href);
-    url.search = `s=${selection.join(".")}`;
+    url.searchParams.set("ucastnici", ucastnici);
+    url.searchParams.set("exkurze", exkurze);
+    url.searchParams.set("cas", cas);
+    url.searchParams.set("pocet", pocet);
     return url.toString();
 
 }

@@ -127,6 +127,14 @@ export default function SearchFragment() {
 
     const matched = React.useMemo(() => {
 
+        if (search.match(/\d{3}/)) {
+            let number = parseInt(search);
+            if (database.loaded && number in database.books)
+                return { [number]: database.books[number] } as Record<number, BookItem>;
+            else
+                return { } as Record<number, BookItem>;
+        }
+
         const keywordStrings = search.match(/\\?.|^$/g)!.reduce((reducer, char) => {
             if (char === '"') {
                 reducer.quote ^= 1;
@@ -173,9 +181,9 @@ export default function SearchFragment() {
                             ...searchIndex.books.filter(([query, _]) => query.includes(word)).map(([_, book]) => book),
                             ...searchIndex.authors.filter(([query, _]) => query.includes(word)).flatMap(([_, author]) => author.books),
                             ...searchIndex.categories.filter(([query, _]) => query.includes(word)).flatMap(([_, category]) => category.books)
-                        ]    
+                        ]
                 }
-                
+
                 return [];
 
             }).map(books => books
@@ -186,7 +194,7 @@ export default function SearchFragment() {
             );
 
             return matches;
-            
+
         })
 
         return Object.values(database.books)
@@ -214,7 +222,7 @@ export default function SearchFragment() {
                 break;
 
             case "author_asc":
-                sortingFun = (a,b) => 
+                sortingFun = (a,b) =>
                     ((a.authors[0]?.short ?? "").localeCompare(b.authors[0]?.short ?? "", "cs")) ||
                     a.name.localeCompare(b.name, "cs");
                 break;
@@ -277,7 +285,7 @@ export default function SearchFragment() {
                             author_asc: "Řazení: Tým, Vzestupně",
                             author_desc: "Řazení: Tým, Sestupně",
                         }[sort]}
-                    
+
                     >
                         <IconButton
                             onClick={cycleSort}
@@ -293,7 +301,7 @@ export default function SearchFragment() {
                                 }}
                                 color={sort.endsWith("asc") ? "action" : "disabled"}
                             />
-                            { sort.startsWith("book")   && <Person/>        } 
+                            { sort.startsWith("book")   && <Person/>        }
                             { sort.startsWith("author") && <Group/>         }
                             <ArrowDropDown
                                 fontSize="small"
@@ -375,7 +383,7 @@ const CustomListItemContent = (props: {
         <ListItemText id={`${props.book.id}`}
             primary={
                 (<>
-                    {props.book.name}
+                    {`${props.book.id}: ${props.book.name}`}
                 </>)
             }
             secondary={
